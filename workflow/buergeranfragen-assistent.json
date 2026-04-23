@@ -1,0 +1,352 @@
+{
+  "name": "Bürgeranfragen-KI-Assistent",
+  "nodes": [
+    {
+      "parameters": {
+        "host": "={{$env.IMAP_HOST}}",
+        "port": 993,
+        "ssl": true,
+        "user": "={{$env.IMAP_USER}}",
+        "password": "={{$env.IMAP_PASSWORD}}",
+        "folder": "={{$env.IMAP_FOLDER || 'INBOX'}}",
+        "markAsRead": true,
+        "fetchUnreadOnly": true
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "E-Mail abrufen",
+      "type": "n8n-nodes-base.emailTrigger",
+      "typeVersion": 2.1,
+      "position": [0, 300],
+      "credentials": {
+        "imap": {
+          "id": "imap-credentials",
+          "name": "IMAP Bürgeranfragen"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "betreff",
+              "value": "={{$json.subject}}"
+            },
+            {
+              "name": "absender",
+              "value": "={{$json.from}}"
+            },
+            {
+              "name": "text",
+              "value": "={{$json.textContent || $json.html || ''}}"
+            },
+            {
+              "name": "datum",
+              "value": "={{$json.date}}"
+            },
+            {
+              "name": "anfrage_id",
+              "value": "={{$runId}}"
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Text extrahieren",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Du bist ein KI-Assistent für eine deutsche Behörde. Analysiere die Bürgeranfrage und klassifiziere sie. Antworte AUSSCHLIESSLICH im JSON-Format: {\"kategorie\": \"kategoriename\", \"prioritaet\": \"hoch|mittel|niedrig\", \"schlagworte\": [], \"zusammenfassung\": \"...\"}. Kategorien: bauwesen, soziales, ordnung, finanzen, bildung, umwelt, verkehr, standesamt, sonstiges. Sachlich, verwaltungsgemäß."
+            },
+            {
+              "role": "user",
+              "content": "=== Betreff ===\n{{$json.betreff}}\n\n=== Absender ===\n{{$json.absender}}\n\n=== Anfrage ===\n{{$json.text}}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.1,
+          "responseFormat": "json_object"
+        }
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "KI Klassifizierung",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.6,
+      "position": [500, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-credentials",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst parsed = typeof response.message === 'string'\n  ? JSON.parse(response.message)\n  : response.message || response;\n\nreturn [{\n  json: {\n    betreff: $('Text extrahieren').first().json.betreff,\n    absender: $('Text extrahieren').first().json.absender,\n    anfrage_id: $('Text extrahieren').first().json.anfrage_id,\n    datum: $('Text extrahieren').first().json.datum,\n    kategorie: parsed.kategorie || 'sonstiges',\n    prioritaet: parsed.prioritaet || 'mittel',\n    schlagworte: parsed.schlagworte || [],\n    zusammenfassung: parsed.zusammenfassung || ''\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "KI-Ergebnis parsen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "value2": "bauwesen",
+              "outputKey": "bauwesen"
+            },
+            {
+              "value2": "soziales",
+              "outputKey": "soziales"
+            },
+            {
+              "value2": "ordnung",
+              "outputKey": "ordnung"
+            },
+            {
+              "value2": "finanzen",
+              "outputKey": "finanzen"
+            },
+            {
+              "value2": "bildung",
+              "outputKey": "bildung"
+            },
+            {
+              "value2": "umwelt",
+              "outputKey": "umwelt"
+            },
+            {
+              "value2": "verkehr",
+              "outputKey": "verkehr"
+            },
+            {
+              "value2": "standesamt",
+              "outputKey": "standesamt"
+            },
+            {
+              "value2": "sonstiges",
+              "outputKey": "sonstiges"
+            }
+          ]
+        },
+        "fallbackOutput": 8,
+        "dataType": "string",
+        "value1": "={{$json.kategorie}}"
+      },
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "name": "Abteilung zuweisen",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const abteilungen = {\n  bauwesen: { name: 'Bauamt', email: 'bauamt@musterhausen.de' },\n  soziales: { name: 'Sozialamt', email: 'sozialamt@musterhausen.de' },\n  ordnung: { name: 'Ordnungsamt', email: 'ordnung@musterhausen.de' },\n  finanzen: { name: 'Kasse', email: 'kasse@musterhausen.de' },\n  bildung: { name: 'Schulverwaltung', email: 'schulverwaltung@musterhausen.de' },\n  umwelt: { name: 'Umweltamt', email: 'umwelt@musterhausen.de' },\n  verkehr: { name: 'Verkehrsamt', email: 'verkehr@musterhausen.de' },\n  standesamt: { name: 'Standesamt', email: 'standesamt@musterhausen.de' },\n  sonstiges: { name: 'Bürgerberatung', email: 'buergerberatung@musterhausen.de' }\n};\n\nconst input = $input.first().json;\nconst abt = abteilungen[input.kategorie] || abteilungen.sonstiges;\n\nreturn [{\n  json: {\n    ...input,\n    abteilung_name: abt.name,\n    abteilung_email: abt.email,\n    aktenzeichen: `AZ-${input.datum.substring(0,4)}-${input.anfrage_id.substring(0,8).toUpperCase()}`\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Abteilung ermitteln",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Erstelle eine formelle Erstantwort im Behördenstil. Sie-Form, kein Du. Bestätige den Eingang und die Weiterleitung. Keine inhaltlichen Zusagen. Platzhalter: {{ANREDE}}, {{DATUM}}, {{AKTENZEICHEN}}, {{ABTEILUNG}}, {{BEHOERDENNAME}}, {{DATENSCHUTZ}}. Füge Datenschutz-Hinweis hinzu."
+            },
+            {
+              "role": "user",
+              "content": "Erstelle Erstantwort für:\nKategorie: {{$json.kategorie}}\nPriorität: {{$json.prioritaet}}\nZusammenfassung: {{$json.zusammenfassung}}\nAktenzeichen: {{$json.aktenzeichen}}\nAbteilung: {{$json.abteilung_name}}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "a1b2c3d4-0007-4000-8000-000000000007",
+      "name": "Erstantwort generieren",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.6,
+      "position": [1500, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-credentials",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "buergeranfragen@musterhausen.de",
+        "toEmail": "={{$json.absender}}",
+        "subject": "Ihre Anfrage an die Stadt Musterhausen - Aktenzeichen: {{$json.aktenzeichen}}",
+        "text": "={{$json.message}}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0008-4000-8000-000000000008",
+      "name": "Erstantwort senden",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1750, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-credentials",
+          "name": "SMTP Bürgeranfragen"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.WEBHOOK_URL || 'http://localhost:5678'}}/webhook/ticket-erstellen",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "anfrage_id", "value": "={{$json.anfrage_id}}" },
+            { "name": "kategorie", "value": "={{$json.kategorie}}" },
+            { "name": "prioritaet", "value": "={{$json.prioritaet}}" },
+            { "name": "abteilung", "value": "={{$json.abteilung_name}}" },
+            { "name": "aktenzeichen", "value": "={{$json.aktenzeichen}}" },
+            { "name": "absender", "value": "={{$json.absender}}" }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0009-4000-8000-000000000009",
+      "name": "Ticket erstellen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO audit_log (anfrage_id, timestamp, absender_email, betreff, kategorie, prioritaet, abteilung, ziel_email, antwort_gesendet, dauer_sekunden) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7, $8, $9)",
+        "queryParameters": {
+          "parameters": [
+            { "name": "1", "value": "={{$('Abteilung ermitteln').first().json.anfrage_id}}" },
+            { "name": "2", "value": "={{$('Abteilung ermitteln').first().json.absender}}" },
+            { "name": "3", "value": "={{$('Abteilung ermitteln').first().json.betreff}}" },
+            { "name": "4", "value": "={{$('Abteilung ermitteln').first().json.kategorie}}" },
+            { "name": "5", "value": "={{$('Abteilung ermitteln').first().json.prioritaet}}" },
+            { "name": "6", "value": "={{$('Abteilung ermitteln').first().json.abteilung_name}}" },
+            { "name": "7", "value": "={{$('Abteilung ermitteln').first().json.abteilung_email}}" },
+            { "name": "8", "value": true },
+            { "name": "9", "value": "={{Math.round(($now - new Date($('Abteilung ermitteln').first().json.datum).getTime()) / 1000)}}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0010-4000-8000-000000000010",
+      "name": "Audit-Log schreiben",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [2250, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-credentials",
+          "name": "PostgreSQL Audit"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fehler-Handler: Logge Fehler und sende keine Antwort\nconst error = $input.first().json;\nconsole.error('Fehler bei der Verarbeitung:', error);\nreturn [{ json: { fehler: error.message || 'Unbekannter Fehler' } }];"
+      },
+      "id": "a1b2c3d4-0011-4000-8000-000000000011",
+      "name": "Fehler behandeln",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 500]
+    }
+  ],
+  "connections": {
+    "E-Mail abrufen": {
+      "main": [
+        [{ "node": "Text extrahieren", "type": "main", "index": 0 }]
+      ]
+    },
+    "Text extrahieren": {
+      "main": [
+        [{ "node": "KI Klassifizierung", "type": "main", "index": 0 }]
+      ]
+    },
+    "KI Klassifizierung": {
+      "main": [
+        [{ "node": "KI-Ergebnis parsen", "type": "main", "index": 0 }]
+      ]
+    },
+    "KI-Ergebnis parsen": {
+      "main": [
+        [{ "node": "Abteilung zuweisen", "type": "main", "index": 0 }]
+      ]
+    },
+    "Abteilung zuweisen": {
+      "main": [
+        [
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 },
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 },
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 },
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 },
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 },
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 },
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 },
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 },
+          { "node": "Abteilung ermitteln", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Abteilung ermitteln": {
+      "main": [
+        [{ "node": "Erstantwort generieren", "type": "main", "index": 0 }]
+      ]
+    },
+    "Erstantwort generieren": {
+      "main": [
+        [{ "node": "Erstantwort senden", "type": "main", "index": 0 }]
+      ]
+    },
+    "Erstantwort senden": {
+      "main": [
+        [{ "node": "Ticket erstellen", "type": "main", "index": 0 }]
+      ]
+    },
+    "Ticket erstellen": {
+      "main": [
+        [{ "node": "Audit-Log schreiben", "type": "main", "index": 0 }]
+      ]
+    },
+    "Audit-Log schreiben": {
+      "main": [[]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "fehler-workflow"
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "bürgeranfragen" },
+    { "name": "ki-assistent" },
+    { "name": "behörde" }
+  ]
+}

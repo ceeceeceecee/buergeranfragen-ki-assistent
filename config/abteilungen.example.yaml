@@ -1,0 +1,85 @@
+# =====================================================
+# Abteilungs-Konfiguration
+# Mapping: Kategorie → Abteilung → E-Mail-Adresse
+# =====================================================
+
+# Kategorie-zu-Abteilung-Zuordnung
+abteilungen:
+  bauwesen:
+    name: "Bauamt"
+    email: "bauamt@musterhausen.de"
+    prioritaet_standard: "mittel"
+    eskalation_nach_stunden: 48
+
+  soziales:
+    name: "Sozialamt"
+    email: "sozialamt@musterhausen.de"
+    prioritaet_standard: "mittel"
+    eskalation_nach_stunden: 24
+
+  ordnung:
+    name: "Ordnungsamt"
+    email: "ordnung@musterhausen.de"
+    prioritaet_standard: "hoch"
+    eskalation_nach_stunden: 4
+
+  finanzen:
+    name: "Finanzamt (Kasse)"
+    email: "kasse@musterhausen.de"
+    prioritaet_standard: "niedrig"
+    eskalation_nach_stunden: 72
+
+  bildung:
+    name: "Schulverwaltungsamt"
+    email: "schulverwaltung@musterhausen.de"
+    prioritaet_standard: "mittel"
+    eskalation_nach_stunden: 48
+
+  umwelt:
+    name: "Umweltamt"
+    email: "umwelt@musterhausen.de"
+    prioritaet_standard: "mittel"
+    eskalation_nach_stunden: 48
+
+  verkehr:
+    name: "Verkehrsamt"
+    email: "verkehr@musterhausen.de"
+    prioritaet_standard: "mittel"
+    eskalation_nach_stunden: 48
+
+  standesamt:
+    name: "Standesamt"
+    email: "standesamt@musterhausen.de"
+    prioritaet_standard: "hoch"
+    eskalation_nach_stunden: 4
+
+  sonstiges:
+    name: "Zentrale Bürgerberatung"
+    email: "buergerberatung@musterhausen.de"
+    prioritaet_standard: "niedrig"
+    eskalation_nach_stunden: 72
+
+# Prioritätsregeln
+prioritaetsregeln:
+  - schluesselwort: "dringend"
+    prioritaet: "hoch"
+  - schluesselwort: "sofort"
+    prioritaet: "hoch"
+  - schluesselwort: "notfall"
+    prioritaet: "hoch"
+  - schluesselwort: "beschwerde"
+    prioritaet: "hoch"
+  - schluesselwort: "frist"
+    prioritaet: "mittel"
+
+# Eskalations-Kette
+eskalation:
+  stufe_1:
+    nach_stunden: 4
+    benachrichtigung: "teamleiter@abteilung.de"
+  stufe_2:
+    nach_stunden: 24
+    benachrichtigung: "amtsleiter@abteilung.de"
+  stufe_3:
+    nach_stunden: 48
+    benachrichtigung: "buergermeister@musterhausen.de"

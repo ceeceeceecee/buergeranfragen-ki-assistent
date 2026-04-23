@@ -1,0 +1,107 @@
+# =====================================================
+# Antwort-Vorlagen
+# Textbausteine pro Kategorie, anpassbar pro Kommune
+# =====================================================
+
+# Allgemeine Einstellungen
+allgemein:
+  behoerdenname: "Stadt Musterhausen"
+  anrede: "Sehr geehrte/r Frau/Herr"
+  abschluss: "Mit freundlichen Grüßen"
+  datenschutz_hinweis: |
+    Hinweis zum Datenschutz: Ihre persönlichen Daten werden gemäß
+    der Datenschutz-Grundverordnung (DSGVO) verarbeitet. Nähere
+    Informationen finden Sie in unserer Datenschutzerklärung unter
+    https://www.musterhausen.de/datenschutz.
+  bearbeitungszeit: "Wir werden Ihre Anfrage innerhalb von 10 Werktagen bearbeiten."
+
+# Vorlagen pro Kategorie
+vorlagen:
+  bauwesen:
+    betreff: "Ihre Anfrage zum Thema Bauwesen - Aktenzeichen: {{AKTENZEICHEN}}"
+    text: |
+      {{ANREDE}},
+
+      vielen Dank für Ihre Anfrage vom {{DATUM}}, die Sie an die Stadt Musterhausen gerichtet haben.
+
+      Ihr Anliegen wurde dem Bauamt zugewiesen und unter dem Aktenzeichen {{AKTENZEICHEN}} registriert.
+
+      Ein zuständiger Sachbearbeiter wird sich zeitnah bei Ihnen melden.
+
+      {{BEARBEITUNGSZEIT}}
+
+      {{DATENSCHUTZ}}
+
+      {{ABSCHLUSS}}
+      {{BEHOERDENNAME}}
+      Sachbearbeitung Bauamt
+
+  soziales:
+    betreff: "Ihre Anfrage an das Sozialamt - Aktenzeichen: {{AKTENZEICHEN}}"
+    text: |
+      {{ANREDE}},
+
+      Ihre Anfrage vom {{DATUM}} wurde entgegengenommen und dem Sozialamt zugewiesen.
+
+      Aktenzeichen: {{AKTENZEICHEN}}
+
+      Das Sozialamt wird Ihre Angelegenheit prüfen und sich innerhalb der regulären Bearbeitungszeit bei Ihnen melden.
+
+      Sollten Sie Unterlagen einreichen müssen, werden Sie hierzu gesondert aufgefordert.
+
+      {{DATENSCHUTZ}}
+
+      {{ABSCHLUSS}}
+      {{BEHOERDENNAME}}
+      Sozialamt
+
+  ordnung:
+    betreff: "Ihre Meldung an das Ordnungsamt - Aktenzeichen: {{AKTENZEICHEN}}"
+    text: |
+      {{ANREDE}},
+
+      Ihre Meldung vom {{DATUM}} wurde an das Ordnungsamt weitergeleitet und unter dem Aktenzeichen {{AKTENZEICHEN}} erfasst.
+
+      Das Ordnungsamt wird die Angelegenheit prüfen und ggf. erforderliche Maßnahmen einleiten.
+
+      Aus datenschutzrechtlichen Gründen können wir Ihnen keine Auskünfte über Maßnahmen gegen Dritte erteilen.
+
+      {{DATENSCHUTZ}}
+
+      {{ABSCHLUSS}}
+      {{BEHOERDENNAME}}
+      Ordnungsamt
+
+  standesamt:
+    betreff: "Ihre Anfrage an das Standesamt - Aktenzeichen: {{AKTENZEICHEN}}"
+    text: |
+      {{ANREDE}},
+
+      Ihre Anfrage vom {{DATUM}} wurde dem Standesamt zugewiesen (Aktenzeichen: {{AKTENZEICHEN}}).
+
+      Für Terminvereinbarungen und weitere Informationen wenden Sie sich bitte direkt an das Standesamt:
+      Telefon: +49 1234 5678 90
+      Sprechzeiten: Mo-Fr 08:30-12:00 Uhr
+
+      {{DATENSCHUTZ}}
+
+      {{ABSCHLUSS}}
+      {{BEHOERDENNAME}}
+      Standesamt
+
+  sonstiges:
+    betreff: "Ihre Anfrage an die Stadt Musterhausen - Aktenzeichen: {{AKTENZEICHEN}}"
+    text: |
+      {{ANREDE}},
+
+      Ihre Anfrage vom {{DATUM}} ist bei uns eingegangen und wurde unter dem Aktenzeichen {{AKTENZEICHEN}} registriert.
+
+      Wir leiten Ihr Anliegen an die zuständige Stelle weiter und melden uns zeitnah bei Ihnen.
+
+      {{BEARBEITUNGSZEIT}}
+
+      {{DATENSCHUTZ}}
+
+      {{ABSCHLUSS}}
+      {{BEHOERDENNAME}}
+      Zentrale Bürgerberatung
