@@ -53,6 +53,41 @@ chmod +x setup.sh
 ./setup.sh --check
 ```
 
+## 🚀 Schnellstart
+
+### Voraussetzungen
+
+| Komponente | Version | Zweck |
+|---|---|---|
+| Ollama | neueste | Lokale KI-Verarbeitung |
+| n8n | neueste | Workflow-Engine |
+| PostgreSQL | 14+ | Audit-Protokollierung |
+| IMAP-Postfach | — | E-Mail-Empfang |
+| Docker (optional) | 20.10+ | Container-Deployment |
+
+### Installation
+
+```bash
+git clone https://github.com/ceeceeceecee/buergeranfragen-ki-assistent.git
+cd buergeranfragen-ki-assistent
+
+# Ein-Kommando-Installation
+chmod +x setup.sh
+./setup.sh
+
+# Oder unattended:
+cp .env.example .env && ./setup.sh --unattended
+```
+
+### Erste Schritte
+
+1. **Setup abschließen** — Das interaktive Script führt durch Ollama, n8n, E-Mail-Konfiguration
+2. **KI-Modell herunterladen** — Setup lädt empfohlenes Modell automatisch
+3. **Workflow importieren** — n8n Workflows werden automatisch importiert
+4. **Test-E-Mail** senden und KI-Klassifizierung prüfen
+
+---
+
 ## Features
 
 | Feature | Beschreibung |
