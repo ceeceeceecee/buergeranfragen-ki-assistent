@@ -167,73 +167,61 @@
   "connections": {
     "Neue E-Mails abrufen": {
       "main": [
-        [
-          {
-            "node": "E-Mail-Daten extrahieren",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        {
+          "node": "E-Mail-Daten extrahieren",
+          "type": "main",
+          "index": 0
+        }
       ]
     },
     "E-Mail-Daten extrahieren": {
       "main": [
-        [
-          {
-            "node": "Anfrage klassifizieren (Ollama)",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        {
+          "node": "Anfrage klassifizieren (Ollama)",
+          "type": "main",
+          "index": 0
+        }
       ]
     },
     "Anfrage klassifizieren (Ollama)": {
       "main": [
-        [
-          {
-            "node": "Kategorie parsen",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        {
+          "node": "Kategorie parsen",
+          "type": "main",
+          "index": 0
+        }
       ]
     },
     "Kategorie parsen": {
       "main": [
-        [
-          {
-            "node": "Erstantwort generieren (Ollama)",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        {
+          "node": "Erstantwort generieren (Ollama)",
+          "type": "main",
+          "index": 0
+        }
       ]
     },
     "Erstantwort generieren (Ollama)": {
       "main": [
-        [
-          {
-            "node": "Antwort parsen",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        {
+          "node": "Antwort parsen",
+          "type": "main",
+          "index": 0
+        }
       ]
     },
     "Antwort parsen": {
       "main": [
-        [
-          {
-            "node": "Audit-Log speichern",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Erstantwort senden",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        {
+          "node": "Audit-Log speichern",
+          "type": "main",
+          "index": 0
+        },
+        {
+          "node": "Erstantwort senden",
+          "type": "main",
+          "index": 0
+        }
       ]
     }
   },
@@ -247,7 +235,6 @@
     "instanceId": "buergeranfragen-ki-assistent",
     "templateId": "buergeranfragen"
   },
-  "tags": [
-    "bürgeranfragen"
-  ]
+  "tags": [],
+  "id": "98931d5c-79cf-4721-91a2-e4335a526be0"
 }
