@@ -1,172 +1,157 @@
-# Bürgeranfragen-KI-Assistent – Automatische Klassifizierung & Weiterleitung
+# Bürgeranfragen-KI-Assistent
 
-![DSGVO-Konform](https://img.shields.io/badge/DSGVO-Konform-brightgreen)
+![DSGVO-konform](https://img.shields.io/badge/DSGVO-konform-brightgreen)
 ![Self-Hosted](https://img.shields.io/badge/Self--Hosted-100%25-blue)
-![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED)
-![n8n Workflow](https://img.shields.io/badge/n8n-Workflow-orange)
-![License: MIT](https://img.shields.io/badge/Lizenz-MIT-yellow)
+![Ollama](https://img.shields.io/badge/KI-Ollama-orange)
+![n8n](https://img.shields.io/badge/Workflow-n8n-ff6d5a)
+![MIT](https://img.shields.io/badge/Lizenz-MIT-green)
 
-> 🏛️ **KI-gestützte Bürgeranfragen-Verarbeitung für deutsche Behörden** — Automatische Klassifizierung, Abteilungszuweisung und Erstantwort-Generierung. Vollständig self-hosted und DSGVO-konform.
+**DSGVO-konforme KI-Bearbeitung von Bürgeranfragen** — komplett self-hosted, keine Cloud-APIs, keine Datenabflüsse.
 
----
+## Was ist das?
 
-## 🎯 Problem & Lösung
+Der Bürgeranfragen-KI-Assistent verarbeitet eingehende Bürger-E-Mails automatisch:
+- **Klassifizierung** der Anfrage nach Kategorie (Baubehörde, Sozialamt, etc.)
+- **Erstellung** einer professionellen Erstantwort
+- **Audit-Protokollierung** jedes Vorgangs in PostgreSQL
+- **Weiterleitung** an die zuständige Abteilung
 
-### Das Problem
-Kommunen und Behörden erhalten täglich Hunderte Bürgeranfragen per E-Mail. Die manuelle Verteilung an die richtige Abteilung kostet Zeit, verzögert Antworten und führt zu Frustration bei Bürgerinnen und Bürgern.
+Alle KI-Funktionen laufen über **Ollama** auf dem eigenen Server — keine Daten verlassen das System.
 
-### Die Lösung
-Der Bürgeranfragen-KI-Assistent analysiert eingehende E-Mails automatisch, klassifiziert sie nach Kategorie und Priorität, leitet sie an die zuständige Abteilung weiter und generiert eine professionelle Erstantwort — alles auf Ihrer eigenen Infrastruktur, DSGVO-konform und ohne Datenabfluss.
+## Ein-Kommando-Installation
 
----
+```bash
+curl -sSL https://raw.githubusercontent.com/ceeceeceecee/buergeranfragen-ki-assistent/main/setup.sh | bash
+```
 
-## ✨ Features
+Das interaktive Setup-Script führt durch die komplette Installation:
+1. Systemprüfung & Abhängigkeiten
+2. Ollama + KI-Modell
+3. Open WebUI (optional)
+4. n8n Workflow-Engine
+5. E-Mail-Konfiguration
+6. Workflow-Import
+7. Auto-Start
+8. Health-Check
+
+**Alternativ:** Repo klonen und Setup-Script ausführen:
+```bash
+git clone https://github.com/ceeceeceecee/buergeranfragen-ki-assistent.git
+cd buergeranfragen-ki-assistent
+chmod +x setup.sh
+./setup.sh
+```
+
+### Unattended-Installation
+```bash
+# .env anpassen, dann:
+./setup.sh --unattended
+```
+
+### Nur Systemprüfung
+```bash
+./setup.sh --check
+```
+
+## Features
 
 | Feature | Beschreibung |
 |---------|-------------|
-| 🤖 **KI-Klassifizierung** | Automatische Kategorisierung in 10 Verwaltungsbereiche |
-| 📊 **Priorisierung** | Hoch/Mittel/Niedrig basierend auf Dringlichkeit und Inhalt |
-| 🏢 **Abteilungszuweisung** | Automatische Weiterleitung an zuständige Fachbereiche |
-| 📝 **Erstantwort** | Formulargerechte Erstantwort im Behördenstil |
-| 📋 **Audit-Log** | Vollständige Protokollierung aller Verarbeitungsschritte |
-| 🔒 **DSGVO-Konform** | Kein Datenabfluss, vollständige Dokumentation |
-| 🐳 **Docker Ready** | Ein-Kommando-Deployment |
-| 🔧 **Konfigurierbar** | Abteilungen, Vorlagen und Kategorien anpassbar |
+| E-Mail-Empfang | IMAP-basiert, neue Nachrichten automatisch abrufen |
+| KI-Klassifizierung | Lokale KI (Ollama) ordnet Anfragen zu |
+| Erstantwort | Automatische höfliche Erstantwort mit DSGVO-Hinweis |
+| Audit-Log | Jeder Vorgang wird in PostgreSQL protokolliert |
+| Open WebUI | Web-Oberfläche zum Testen der KI (optional) |
+| Self-Hosted | 100% lokal, kein Cloud-Service |
+| DSGVO-konform | Keine Datenabflüsse, vollständige Protokollierung |
 
----
-
-## 🏗️ Architektur
+## Architektur
 
 ```
-┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│  E-Mail-    │───▶│  n8n         │───▶│  KI-Modul   │
-│  Postfach   │    │  Workflow    │    │  (OpenAI/   │
-│  (IMAP)     │    │  Engine      │    │   Ollama)   │
-└─────────────┘    └──────┬───────┘    └──────┬──────┘
-                          │                   │
-                    ┌─────▼─────┐       ┌─────▼─────┐
-                    │ PostgreSQL │       │  Kategorien│
-                    │ Audit-Log  │       │  Mapping   │
-                    └───────────┘       └───────────┘
-                          │
-                    ┌─────▼─────┐
-                    │  Abteilungs-│
-                    │  E-Mail    │
-                    │  (SMTP)    │
-                    └───────────┘
+  Bürger-E-Mail
+       |
+       v
+  +----------+     +----------+     +-----------+
+  | IMAP     |---->| n8n      |---->| Ollama    |
+  | Postfach |     | Workflow |<----| (lokal)   |
+  +----------+     +----+-----+     +-----------+
+                        |                |
+                   +----v-----+    +----v-----+
+                   | Postgres |    | KI-Modell|
+                   | Audit-Log|    | (llama)  |
+                   +----------+    +----------+
+                        |
+                   +----v-----+
+                   | SMTP     |
+                   | Antwort  |
+                   +----------+
 ```
 
----
+## KI-Modelle
 
-## 🚀 Quick Start
+Empfohlene Modelle (über Ollama):
 
-### Voraussetzungen
+| Modell | Größe | RAM | Qualität |
+|--------|-------|-----|----------|
+| llama3.1 (8B) | 4.7 GB | 8 GB | Empfohlen |
+| mistral (7B) | 4.1 GB | 8 GB | Schnell |
+| llama3.1 (70B) | 40 GB | 48 GB | Hochwertig |
+
+## Screenshots
+
+Setup-Prozess:
+- [Systemprüfung](setup-screenshots/setup-step1-systemcheck.png)
+- [Ollama-Installation](setup-screenshots/setup-step2-ollama.png)
+- [n8n Workflow](setup-screenshots/setup-step3-n8n.png)
+- [E-Mail-Konfiguration](setup-screenshots/setup-step4-email.png)
+- [Health-Check](setup-screenshots/setup-final-healthcheck.png)
+
+Externe Screenshots:
+- [Ollama: offizielle Screenshots](https://ollama.ai)
+- [Open WebUI: offizielle Screenshots](https://github.com/open-webui/open-webui)
+
+## DSGVO
+
+Dieses Projekt ist von Grund auf für den Einsatz in öffentlichen Verwaltungen konzipiert:
+
+- **Keine Cloud-APIs**: Ollama läuft vollständig auf dem eigenen Server
+- **Keine Datenübertragung**: Bürgerdaten verlassen das System nie
+- **Vollständige Protokollierung**: Jede KI-Antwort wird in PostgreSQL auditiert
+- **Löschkonzept**: Automatisches Löschen alter Audit-Einträge konfigurierbar
+- **Verschlüsselung**: TLS für IMAP/SMTP, PostgreSQL-Verbindung verschlüsselt
+
+Siehe auch: [Datenschutzerklärung](docs/datenschutz.md)
+
+## Verwaltungs-Use-Cases
+
+- **Stadtverwaltung**: Bürgeranfragen, Bescheinigungen, Meldewesen
+- **Landratsamt**: Bauanträge, Genehmigungen, Förderungen
+- **Behörde**: Beschwerden, Anträge, Auskünfte
+
+## Systemanforderungen
+
 - Docker & Docker Compose
-- E-Mail-Postfach mit IMAP/SMTP-Zugang
-- OpenAI API-Key oder lokaler Ollama-Server
+- 4+ CPU-Kerne
+- 8+ GB RAM (16 GB empfohlen)
+- 20 GB freier Speicherplatz
 
-### Installation
+## Entwickeln
 
 ```bash
-# Repository klonen
-git clone https://github.com/ceeceeceecee/buergeranfragen-ki-assistent.git
-cd buergeranfragen-ki-assistent
+# GPU-Support aktivieren
+docker compose --profile gpu up -d
 
-# Umgebungsvariablen konfigurieren
-cp .env.example .env
-# .env bearbeiten und Ihre Werte eintragen
+# Open WebUI aktivieren
+docker compose --profile webui up -d
 
-# Docker Compose starten
-docker compose up -d
+# Logs anzeigen
+docker compose logs -f n8n
 ```
 
-### n8n Workflow importieren
+## Lizenz
 
-1. n8n unter `http://localhost:5678` öffnen
-2. Workflow aus `workflow/buergeranfragen-assistent.json` importieren
-3. IMAP- und SMTP-Credentials konfigurieren
-4. OpenAI/Ollama-Credentials einrichten
-5. Workflow aktivieren
+MIT — siehe [LICENSE](LICENSE)
 
----
+## Autor
 
-## 📸 Screenshots
-
-![Workflow-Diagramm](screenshots/workflow-diagramm.png)
-*Workflow-Übersicht im n8n Editor*
-
-![Klassifizierung-Beispiel](screenshots/klassifizierung-beispiel.png)
-*E-Mail-Klassifizierung durch die KI*
-
-![Audit-Log](screenshots/audit-log.png)
-*Nachvollziehbare Audit-Logs aller Anfragen*
-
-![Dashboard](screenshots/dashboard.png)
-*Statistiken und Übersicht aller Anfragen*
-
----
-
-## 🔒 Datenschutz & DSGVO
-
-### ⚠️ DSGVO-Konformität ist Kern dieses Projekts
-
-- **Kein Datenabfluss:** Alle Daten bleiben auf Ihrer Infrastruktur
-- **Löschkonzept:** Automatische Löschung nach konfigurierbarem Zeitraum
-- **Audit-Trail:** Jede Verarbeitungsschritt wird protokolliert
-- **Drittanbieterfrei:** Optional lokaler KI-Server (Ollama) statt Cloud-API
-- **Dokumentation:** Vollständige Datenschutzbeschreibung beiliegend
-
-👉 [Datenschutz-Dokumentation](docs/datenschutz.md)
-
----
-
-## 🏛️ Use Cases für Behörden
-
-| Szenario | Beschreibung |
-|----------|-------------|
-| **Stadtverwaltung** | Bürgeranfragen zentral erfassen und an Fachämter verteilen |
-| **Landratsamt** | Regionale Anfragen nach Themenbereichen sortieren |
-| **Bürgeramt** | Terminanfragen, Dokumentenwünsche und Auskünfte automatisieren |
-| **Ordnungsamt** | Beschwerden und Meldungen priorisieren |
-| **Bauamt** | Bauanfragen und Genehmigungsanfragen vorfiltern |
-
----
-
-## 🗺️ Roadmap
-
-- [x] Basis-Workflow mit IMAP/SMTP
-- [x] KI-Klassifizierung (10 Kategorien)
-- [x] Erstantwort-Generierung
-- [x] Audit-Log mit PostgreSQL
-- [x] Docker-Deployment
-- [ ] Web-Dashboard für Sachbearbeiter
-- [ ] Ollama-Integration für Offline-Betrieb
-- [ ] Mehrsprachige Anfragen-Erkennung
-- [ ] Schnittstelle zu gängigen Verwaltungssoftware (z.B. Fabasoft, ELO)
-- [ ] Bürgerportal-Integration
-
----
-
-## 🤝 Contributing
-
-Beiträge sind willkommen! Bitte beachten Sie:
-
-1. Fork des Repositories erstellen
-2. Feature-Branch anlegen (`git checkout -b feature/neues-feature`)
-3. Änderungen committen (`git commit -m 'Neues Feature hinzugefügt'`)
-4. Branch pushen (`git push origin feature/neues-feature`)
-5. Pull Request erstellen
-
----
-
-## 📄 Lizenz
-
-Dieses Projekt steht unter der [MIT-Lizenz](LICENSE).
-
----
-
-## 👤 Autor
-
-**Cela** — Freelancer für digitale Verwaltungslösungen
-
-[GitHub](https://github.com/ceeceeceecee)
+Entwickelt für DSGVO-konforme Bürgerkommunikation.
