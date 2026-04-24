@@ -417,12 +417,35 @@ import_workflow() {
       return
     fi
   done
-
   ok "n8n ist erreichbar"
 
-  # Workflow via n8n API importieren
+  # n8n 2.x: Ensure owner exists and create personal project via DB
+  info "Richte n8n ein..."
+  docker exec buergeranfragen-postgres psql -U n8n -d n8n -c "
+    INSERT INTO project (id, name, type, \"creatorId\", \"createdAt\", \"updatedAt\")
+    VALUES ('personal-project', 'Personal', 'personal',
+      (SELECT id FROM \"user\" LIMIT 1), NOW(), NOW())
+    ON CONFLICT DO NOTHING;
+  " &>/dev/null
+
+  # n8n 2.x: Login to get JWT cookie
+  local n8n_email="${N8N_EMAIL:-admin@localhost}"
+  local n8n_password="${N8N_PASSWORD:-$(openssl rand -hex 12)}"
+  local login_response
+  login_response=$(curl -s -c /tmp/n8n_cookies.txt -X POST http://localhost:5678/rest/login \
+    -H "Content-Type: application/json" \
+    -d "{\"emailOrLdapLoginId\":\"\${n8n_email}\",\"password\":\"\${n8n_password}\"}" 2>/dev/null)
+
+  if ! echo "$login_response" | grep -q '"id"'; then
+    warn "n8n Login fehlgeschlagen — bitte n8n-Setup im Browser abschließen"
+    warn "Dann: n8n → Einstellungen → API → Import → workflow/buergeranfragen-assistent.json"
+    return
+  fi
+  ok "n8n Login erfolgreich"
+
+  # Import workflow via n8n 2.x REST API
   local response
-  response=$(curl -s -X POST http://localhost:5678/api/v1/workflows/import \
+  response=$(curl -s -b /tmp/n8n_cookies.txt -X POST http://localhost:5678/rest/workflows \
     -H "Content-Type: application/json" \
     -d @"$WORKFLOW_FILE" 2>/dev/null)
 
@@ -430,6 +453,7 @@ import_workflow() {
     ok "Bürgeranfragen-Workflow in n8n importiert"
   else
     warn "Workflow-Import fehlgeschlagen (manuell in n8n importieren)"
+    info "Workflow-Datei: ${WORKFLOW_FILE}"
   fi
 }
 

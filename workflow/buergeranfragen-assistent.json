@@ -22,7 +22,10 @@
       "name": "Neue E-Mails abrufen",
       "type": "n8n-nodes-base.emailTrigger",
       "typeVersion": 1.1,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -32,7 +35,10 @@
       "name": "E-Mail-Daten extrahieren",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [480, 300]
+      "position": [
+        480,
+        300
+      ]
     },
     {
       "parameters": {
@@ -41,12 +47,15 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Type", "value": "application/json" }
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={ {\n  \"model\": $env.OLLAMA_MODEL || \"llama3.1\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Du bist ein KI-Assistent für eine deutsche Stadtverwaltung. Klassifiziere die folgende Bürgeranfrage in eine dieser Kategorien: amtliche_bescheinigung, meldeangelegenheit, bauantrag, verkehr_anordnung, abfall_entsorgung, sozialleistung, steuer, beschwerde, sonstiges. Antworte NUR mit der Kategorie, nichts anderes.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Betreff: \" + $json.subject + \"\\n\\n\" + $json.body\n    }\n  ],\n  \"stream\": false\n} }",
+        "jsonBody": "={{ {\n  \"model\": $env.OLLAMA_MODEL || \"llama3.1\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Du bist ein KI-Assistent für eine deutsche Stadtverwaltung. Klassifiziere die folgende Bürgeranfrage in eine dieser Kategorien: amtliche_bescheinigung, meldeangelegenheit, bauantrag, verkehr_anordnung, abfall_entsorgung, sozialleistung, steuer, beschwerde, sonstiges. Antworte NUR mit der Kategorie, nichts anderes.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Betreff: \" + $json.subject + \"\\n\\n\" + $json.body\n    }\n  ],\n  \"stream\": false\n}}",
         "options": {
           "timeout": 60000
         }
@@ -55,7 +64,10 @@
       "name": "Anfrage klassifizieren (Ollama)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [720, 300]
+      "position": [
+        720,
+        300
+      ]
     },
     {
       "parameters": {
@@ -65,7 +77,10 @@
       "name": "Kategorie parsen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [960, 300]
+      "position": [
+        960,
+        300
+      ]
     },
     {
       "parameters": {
@@ -74,12 +89,15 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Type", "value": "application/json" }
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={ {\n  \"model\": $env.OLLAMA_MODEL || \"llama3.1\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Du bist ein höflicher KI-Assistent einer deutschen Stadtverwaltung. Erstelle eine professionelle Erstantwort auf die folgende Bürgeranfrage. Die Antwort soll: 1) Den Absender namentlich ansprechen 2) Die Anfrage bestätigen 3) Eine grobe Bearbeitungsfrist nennen (3-5 Werktage) 4) Hinweis auf Datenschutz (DSGVO) 5) Kontaktdaten der zuständigen Abteilung Kategorie: \" + $json.category\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Betreff: \" + $json.subject + \"\\nVon: \" + $json.from + \"\\n\\n\" + $json.body\n    }\n  ],\n  \"stream\": false\n} }",
+        "jsonBody": "={{ {\n  \"model\": $env.OLLAMA_MODEL || \"llama3.1\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Du bist ein höflicher KI-Assistent einer deutschen Stadtverwaltung. Erstelle eine professionelle Erstantwort auf die folgende Bürgeranfrage. Die Antwort soll: 1) Den Absender namentlich ansprechen 2) Die Anfrage bestätigen 3) Eine grobe Bearbeitungsfrist nennen (3-5 Werktage) 4) Hinweis auf Datenschutz (DSGVO) 5) Kontaktdaten der zuständigen Abteilung Kategorie: \" + $json.category\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Betreff: \" + $json.subject + \"\\nVon: \" + $json.from + \"\\n\\n\" + $json.body\n    }\n  ],\n  \"stream\": false\n}}",
         "options": {
           "timeout": 60000
         }
@@ -88,7 +106,10 @@
       "name": "Erstantwort generieren (Ollama)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, 300]
+      "position": [
+        1200,
+        300
+      ]
     },
     {
       "parameters": {
@@ -98,7 +119,10 @@
       "name": "Antwort parsen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1440, 300]
+      "position": [
+        1440,
+        300
+      ]
     },
     {
       "parameters": {
@@ -111,7 +135,10 @@
       "name": "Audit-Log speichern",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1680, 180],
+      "position": [
+        1680,
+        180
+      ],
       "credentials": {
         "postgres": {
           "id": "postgres-credentials",
@@ -131,50 +158,81 @@
       "name": "Erstantwort senden",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [1680, 420]
+      "position": [
+        1680,
+        420
+      ]
     }
   ],
   "connections": {
     "Neue E-Mails abrufen": {
       "main": [
         [
-          { "node": "E-Mail-Daten extrahieren", "type": "main", "index": 0 }
+          {
+            "node": "E-Mail-Daten extrahieren",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "E-Mail-Daten extrahieren": {
       "main": [
         [
-          { "node": "Anfrage klassifizieren (Ollama)", "type": "main", "index": 0 }
+          {
+            "node": "Anfrage klassifizieren (Ollama)",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Anfrage klassifizieren (Ollama)": {
       "main": [
         [
-          { "node": "Kategorie parsen", "type": "main", "index": 0 }
+          {
+            "node": "Kategorie parsen",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Kategorie parsen": {
       "main": [
         [
-          { "node": "Erstantwort generieren (Ollama)", "type": "main", "index": 0 }
+          {
+            "node": "Erstantwort generieren (Ollama)",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Erstantwort generieren (Ollama)": {
       "main": [
         [
-          { "node": "Antwort parsen", "type": "main", "index": 0 }
+          {
+            "node": "Antwort parsen",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Antwort parsen": {
       "main": [
         [
-          { "node": "Audit-Log speichern", "type": "main", "index": 0 },
-          { "node": "Erstantwort senden", "type": "main", "index": 0 }
+          {
+            "node": "Audit-Log speichern",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Erstantwort senden",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
@@ -190,10 +248,6 @@
     "templateId": "buergeranfragen"
   },
   "tags": [
-    {
-      "name": "bürgeranfragen",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2024-01-01T00:00:00.000Z"
-    }
+    "bürgeranfragen"
   ]
 }
