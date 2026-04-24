@@ -184,10 +184,11 @@ docker compose --profile webui up -d
 docker compose logs -f n8n
 ```
 
+
+## 👤 Autor
+
+**Cela** — Freelancer für digitale Verwaltungslösungen
 ## Lizenz
 
 MIT — siehe [LICENSE](LICENSE)
 
-## Autor
-
-Entwickelt für DSGVO-konforme Bürgerkommunikation.
