@@ -97,18 +97,19 @@ Empfohlene Modelle (über Ollama):
 | mistral (7B) | 4.1 GB | 8 GB | Schnell |
 | llama3.1 (70B) | 40 GB | 48 GB | Hochwertig |
 
-## Screenshots
+## 📸 Screenshots
 
-Setup-Prozess:
-- [Systemprüfung](setup-screenshots/setup-step1-systemcheck.png)
-- [Ollama-Installation](setup-screenshots/setup-step2-ollama.png)
-- [n8n Workflow](setup-screenshots/setup-step3-n8n.png)
-- [E-Mail-Konfiguration](setup-screenshots/setup-step4-email.png)
-- [Health-Check](setup-screenshots/setup-final-healthcheck.png)
+### Dashboard — Übersicht aller Bürgeranfragen
+![Dashboard](screenshots/dashboard.png)
 
-Externe Screenshots:
-- [Ollama: offizielle Screenshots](https://ollama.ai)
-- [Open WebUI: offizielle Screenshots](https://github.com/open-webui/open-webui)
+### Klassifizierung — Automatische KI-Kategorisierung
+![Klassifizierung](screenshots/klassifizierung-beispiel.png)
+
+### Workflow-Diagramm — Verarbeitungspipeline
+![Workflow](screenshots/workflow-diagramm.png)
+
+### Audit-Log — Protokollierte Bearbeitungsschritte
+![Audit-Log](screenshots/audit-log.png)
 
 ## DSGVO
 
