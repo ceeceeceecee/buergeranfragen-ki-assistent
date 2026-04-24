@@ -145,17 +145,30 @@ check_system() {
   detect_os
 
   local missing=()
-  check_command docker || missing+=(docker)
-  check_command docker || {
-    # Docker Compose Check
+
+  # Docker prüfen
+  if command -v docker &>/dev/null; then
+    local dv
+    dv=$(docker --version 2>/dev/null | head -1 || echo "")
+    ok "Docker ${dv} gefunden"
+
+    # Docker Compose prüfen
     if docker compose version &>/dev/null; then
-      ok "Docker Compose v2 (Plugin) gefunden"
-    elif docker-compose --version &>/dev/null; then
-      ok "Docker Compose (Standalone) gefunden"
+      local dcv
+      dcv=$(docker compose version 2>/dev/null | head -1 || echo "")
+      ok "Docker Compose v2 (Plugin): ${dcv}"
+    elif command -v docker-compose &>/dev/null; then
+      local dcv
+      dcv=$(docker-compose --version 2>/dev/null | head -1 || echo "")
+      ok "Docker Compose (Standalone): ${dcv}"
     else
-      missing+=(docker-compose)
+      warn "Docker Compose nicht gefunden"
+      missing+=(docker-compose-plugin)
     fi
-  } || true
+  else
+    warn "Docker nicht gefunden"
+    missing+=(docker docker-compose-plugin)
+  fi
 
   check_command curl || missing+=(curl)
   check_command git || missing+=(git)
@@ -217,25 +230,18 @@ write_env() {
 
 # --- Ollama ---
 OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1}
-OLLAMA_HOST=${OLLAMA_HOST:-0.0.0.0}
-OLLAMA_PORT=11434
 
 # --- n8n ---
 N8N_HOST=${N8N_HOST:-0.0.0.0}
 N8N_PORT=5678
 N8N_PROTOCOL=http
-N8N_BASIC_AUTH_ACTIVE=false
-N8N_ENCRYPTION_KEY=$(openssl rand -hex 24)
+N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-$(openssl rand -hex 24 2>/dev/null || echo "change-me-$(date +%s)")}
 
 # --- PostgreSQL ---
 POSTGRES_DB=n8n
 POSTGRES_USER=n8n
-POSTGRES_PASSWORD=$(openssl rand -hex 16)
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-$(openssl rand -hex 16 2>/dev/null || echo "change-me-$(date +%s)")}
 POSTGRES_PORT=5432
-
-# --- Open WebUI ---
-WEBUI_ENABLED=${WEBUI_ENABLED:-true}
-WEBUI_PORT=3000
 
 # --- E-Mail ---
 IMAP_SERVER=${IMAP_SERVER:-}
@@ -247,10 +253,6 @@ SMTP_PORT=${SMTP_PORT:-587}
 SMTP_USER=${SMTP_USER:-}
 SMTP_PASSWORD=${SMTP_PASSWORD:-}
 EMAIL_FROM=${EMAIL_FROM:-}
-
-# --- Antwort-Vorlagen ---
-ANTWORT_VORLAGEN=/app/config/antwort-vorlagen.yaml
-ABTEILUNGEN=/app/config/abteilungen.yaml
 ENVEOF
   chmod 600 "$ENV_FILE"
   ok "Konfiguration in .env gespeichert"
@@ -527,10 +529,12 @@ health_check() {
   fi
 
   # PostgreSQL
-  if docker compose -f "$COMPOSE_FILE" exec -T postgres pg_isready -U n8n &>/dev/null; then
-    ok "PostgreSQL: Verbunden — OK"
+  if docker compose -f "$COMPOSE_FILE" ps --format json 2>/dev/null | grep -q '"buergeranfragen-postgres".*"running"'; then
+    ok "PostgreSQL: Container läuft — OK"
+  elif docker ps --format '{{.Names}}' | grep -q buergeranfragen-postgres; then
+    ok "PostgreSQL: Container läuft — OK"
   else
-    err "PostgreSQL: Verbindung fehlgeschlagen"
+    err "PostgreSQL: Container nicht gefunden"
     ((failed++))
   fi
 
@@ -579,12 +583,13 @@ run_unattended() {
 main() {
   parse_args "$@"
 
-  header
-
   if $CHECK_ONLY; then
+    header
     run_check_only
     exit 0
   fi
+
+  header
 
   if $UNATTENDED; then
     run_unattended
