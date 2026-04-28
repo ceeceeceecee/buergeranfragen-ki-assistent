@@ -1,7 +1,6 @@
 # Buergeranfragen Ki Assistent
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/ceeceeceecee/ai-document-analyzer/main/docs/coletrading-banner.svg" alt="ColeTrading" width="600">
 </p>
 
 ![DSGVO](https://img.shields.io/badge/DSGVO-Konform-brightgreen) ![Self-Hosted](https://img.shields.io/badge/Self-Hosted-100%-blue) ![Ollama](https://img.shields.io/badge/Ollama-KI-orange?logo=ollama) ![n8n](https://img.shields.io/badge/n8n-Workflow-ff6d5a?logo=n8n) ![License](https://img.shields.io/badge/License-MIT-green)
@@ -67,5 +66,4 @@ Beiträge sind willkommen! Bitte erstelle einen Issue oder Pull Request.
 MIT License — siehe [LICENSE](LICENSE).
 
 <p align="center">
-<a href="https://github.com/ceeceeceecee">ColeTrading</a> &bull; DSGVO-konform &bull; Self-Hosted &bull; Open Source
 </p>
