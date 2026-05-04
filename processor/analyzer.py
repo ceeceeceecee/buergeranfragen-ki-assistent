@@ -2,7 +2,7 @@
 import json, requests
 
 class AnfragenAnalyzer:
-    def __init__(self, url="http://localhost:11434", model="llama3.1:8b", temp=0.2, tokens=4096):
+    def __init__(self, url=None, model="llama3.1:8b", temp=0.2, tokens=4096):
         self.url=url.rstrip("/"); self.model=model; self.temp=temp; self.tokens=tokens
     def is_available(self):
         try: return requests.get(f"{self.url}/api/tags",timeout=3).status_code==200

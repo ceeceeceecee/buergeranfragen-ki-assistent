@@ -1,3 +1,4 @@
+import os
 """Buergeranfragen-KI - Streamlit App"""
 import streamlit as st, os, sys, json, plotly.express as px, pandas as pd
 from datetime import datetime
@@ -13,7 +14,7 @@ st.set_page_config(page_title="Buergeranfragen-KI", page_icon="📨", layout="wi
 st.markdown("[data-testid='stSidebar']{background-color:#151e2e;} [data-testid='stSidebar'] *{color:#c8d6e5 !important;}", unsafe_allow_html=True)
 
 if "analyzer" not in st.session_state:
-    st.session_state.analyzer = AnfragenAnalyzer(db.get_setting("ollama_url","http://localhost:11434"), db.get_setting("ollama_model","llama3.1:8b"))
+    st.session_state.analyzer = AnfragenAnalyzer(db.get_setting("ollama_url",os.getenv("OLLAMA_HOST", "http://localhost:11434")), db.get_setting("ollama_model","llama3.1:8b"))
 
 with st.sidebar:
     st.markdown("📨 **Buergeranfragen-KI**")
@@ -113,7 +114,7 @@ elif page == "⚙️ Einstellungen":
     st.subheader("🤖 KI-Konfiguration")
     c1,c2=st.columns(2)
     with c1:
-        ollama_url=st.text_input("Ollama Server",db.get_setting("ollama_url","http://localhost:11434"))
+        ollama_url=st.text_input("Ollama Server",db.get_setting("ollama_url",os.getenv("OLLAMA_HOST", "http://localhost:11434")))
         model=st.text_input("Modell",db.get_setting("ollama_model","llama3.1:8b"))
     with c2:
         temp=st.text_input("Temperatur",db.get_setting("ollama_temperature","0.2"))

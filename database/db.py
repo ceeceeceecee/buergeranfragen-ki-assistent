@@ -1,3 +1,4 @@
+import os
 """SQLite Datenbank-Manager fuer Buergeranfragen-KI."""
 import sqlite3, json, os
 from datetime import datetime, timedelta
@@ -88,7 +89,7 @@ class DatabaseManager:
             datum = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d %H:%M")
             self.conn.execute("INSERT OR IGNORE INTO anfragen (referenz,betreff,kategorie,prioritaet,absender,nachricht,status,erstellt_am) VALUES (?,?,?,?,?,?,?,?,?)",
                 (ref, betr, kat, prio, abs, nachr, stat, datum))
-        defaults = {"ollama_url":"http://localhost:11434","ollama_model":"llama3.1:8b","sprache":"Deutsch",
+        defaults = {"ollama_url":os.getenv("OLLAMA_HOST", "http://localhost:11434"),"ollama_model":"llama3.1:8b","sprache":"Deutsch",
                     "behoerde":"Stadtverwaltung Musterhausen","datenspeicherung":"Lokal","verschluesselung":"AES-256","protokollierung":"Aktiv"}
         for k,v in defaults.items():
             self.conn.execute("INSERT OR IGNORE INTO settings VALUES (?,?)",(k,v))
